@@ -1,7 +1,8 @@
 streamlit
 pandas
-sqlite3
 tiktoken
 plotly
 numpy
 scikit-learn
+watchdog
+matplotlib
