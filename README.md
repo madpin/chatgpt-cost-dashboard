@@ -6,6 +6,7 @@ The **ChatGPT Cost Dashboard** is a comprehensive tool designed to process, anal
 This Streamlit application allows users to upload JSON files containing conversation data, which are then processed and stored in an SQLite database.  
 The dashboard provides detailed insights into token usage, costs, and various analytical metrics, making it easier to manage and optimize the usage of ChatGPT.
 
+You can find the application [here](https://chatgpt-cost-dashboard.streamlit.app/).
 ## Features
 
 - **Data Upload and Processing**: Upload JSON files containing conversation data, which are processed and stored in an SQLite database.

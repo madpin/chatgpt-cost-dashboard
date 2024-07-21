@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 import os
 import zipfile
+import streamlit as st
 
 # Constants
 DB_FILE = "./data/conversations.db"
@@ -23,7 +24,7 @@ class DataAnalysis:
         """Load data from SQLite database."""
         with sqlite3.connect(self.db_file) as conn:
             return pd.read_sql(query, conn)
-
+    st.cache_data()
     def load_conversations_data(self):
         """Load data for Conversations and Messages."""
         query = """

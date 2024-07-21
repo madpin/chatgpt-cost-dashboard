@@ -70,7 +70,8 @@ def main_dashboard():
                             "input_cost": "${:,.5f}",
                             "output_cost": "${:,.5f}",
                             "total_cost": "${:,.5f}",
-                        }),
+                        }
+                    ),
                     use_container_width=True,
                 )
             else:
