@@ -37,9 +37,18 @@ You can find the application [here](https://chatgpt-cost-dashboard.streamlit.app
 ## Usage
 
 1. **Upload Conversations File**: Use the sidebar to upload your `conversations.json` file.
+<!-- ![Input where you should add the file](static/img/input_page.png) -->
+   <img src="static/img/input_page.png" alt="Input where you should add the file" style="max-width: 400px;" />  
+
 2. **View Dashboard**: Once the file is processed, navigate through the tabs to explore different aspects of the conversation data.
    - **Conversations Tab**: View detailed conversation data and select specific conversations for more insights.
+   <!-- ![Messages](static/img/messages.png) -->
+   <img src="static/img/messages.png" alt="Messages" style="max-width: 400px;" />  
+   
    - **Statistics Tab**: See summary statistics and breakdowns of costs over different periods.
+   <!-- ![Statistics](static/img/statistics_monthly.png) -->
+   <img src="static/img/statistics_monthly.png" alt="Statistics" style="max-width: 400px;" />
+
    - **Advanced Analytics Tab**: (Future Implementation) Explore advanced analytics including sentiment and keyword analysis, and cost forecasting.
 
 ## File Structure
