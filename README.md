@@ -31,7 +31,7 @@ You can find the application [here](https://chatgpt-cost-dashboard.streamlit.app
 
 3. **Run the application:**
    ```sh
-   streamlit run app.py
+   streamlit run dashboard.py
    ```
 
 ## Usage
@@ -49,27 +49,36 @@ You can find the application [here](https://chatgpt-cost-dashboard.streamlit.app
    <!-- ![Statistics](static/img/statistics_monthly.png) -->
    <img src="static/img/statistics_monthly.png" alt="Statistics" style="max-width: 400px;" />
 
-   - **Advanced Analytics Tab**: (Future Implementation) Explore advanced analytics including sentiment and keyword analysis, and cost forecasting.
+   - **Advanced Analytics Tab**: Explore advanced analytics including sentiment and keyword analysis, and cost forecasting.
 
 ## File Structure
 
-- **app.py**: The main application file containing all the logic and Streamlit code.
+- `dashboard.py`: The main Streamlit application file. Handles UI and orchestrates calls to other modules.
+- `sidebar.py`: Defines the sidebar UI components, including file upload.
+- `data_ingestion.py`: Handles ingestion of raw JSON data, processing, and storage into the SQLite database.
+- `data_analysis.py`: Performs data loading from the database, calculations, and analytical functions (summaries, period costs, sentiment, keywords, forecasting).
+- `visualization.py`: Responsible for generating and displaying various charts and visual elements based on data from `DataAnalysis`.
 - **requirements.txt**: A list of all Python dependencies required for the project.
 - **data/**: Directory to store the SQLite database.
 
 ## Key Functions
 
-- **count_tokens(text: str) -> int**: Counts tokens in a given text using tiktoken.
-- **safe_to_datetime(ts: float) -> str**: Safely converts a timestamp to a datetime string.
-- **process_conversation(conversation: dict) -> list**: Processes a single conversation and returns a list of message dictionaries.
-- **calculate_costs(df: pd.DataFrame) -> pd.DataFrame**: Calculates input, output, and total costs based on token usage.
-- **process_json_to_sqlite(json_data, db_file)**: Processes JSON data and stores it in an SQLite database.
-- **load_data(query)**: Loads data from the SQLite database based on a SQL query.
-- **calculate_conversation_summary(df: pd.DataFrame) -> pd.DataFrame**: Calculates summary statistics for each conversation.
-- **calculate_period_costs(df: pd.DataFrame, period: str) -> pd.DataFrame**: Calculates costs by specified periods (D, W, M).
-- **sentiment_analysis(messages_df: pd.DataFrame) -> pd.DataFrame**: Performs basic sentiment analysis based on keywords.
-- **keyword_analysis(messages_df: pd.DataFrame) -> pd.DataFrame**: Performs keyword frequency analysis.
-- **cost_forecasting(df: pd.DataFrame) -> pd.DataFrame**: Forecasts future costs using linear regression.
+- **`DataIngestion` (`data_ingestion.py`):**
+    - `process_json_to_sqlite()`: Processes uploaded JSON data, calculates initial metrics (like tokens and costs), and stores the structured data in an SQLite database. Includes helper methods for token counting, date conversion, and initial data processing.
+- **`DataAnalysis` (`data_analysis.py`):**
+    - `load_conversations_data()`: Loads detailed conversation and message data from the SQLite database.
+    - `calculate_conversation_summary()`: Aggregates data to provide a summary for each conversation (e.g., total messages, tokens, cost).
+    - `calculate_period_costs()`: Calculates total costs and token usage, grouped by specified time periods (daily, weekly, monthly).
+    - `perform_sentiment_analysis()`: Analyzes message content to determine sentiment (positive, negative, neutral).
+    - `perform_keyword_analysis()`: Identifies and counts frequently used keywords in messages.
+    - `perform_cost_forecasting()`: Forecasts future costs based on historical data using linear regression.
+    - `calculate_token_efficiency()`: Calculates the ratio of output tokens to input tokens.
+- **`Visualization` (`visualization.py`):**
+    - Contains methods like `display_summary_statistics()`, `display_period_breakdown()`, `display_sentiment_analysis()`, `display_keyword_analysis()`, `display_cost_forecasting()`, and `display_token_efficiency()` which are responsible for rendering various UI components and Plotly charts in the Streamlit dashboard, using data prepared by the `DataAnalysis` module.
+- **`sidebar.py`:**
+    - The `sidebar()` function renders the Streamlit sidebar, including instructions and the file uploader widget. It uses `DataIngestion` to process the uploaded file.
+- **`dashboard.py`:**
+    - The `main_dashboard()` function sets up the main page structure with tabs for "Conversations", "Statistics", and "Advanced Analytics". It integrates functionalities from `DataAnalysis` and `Visualization` to display data and charts. The `main()` function in this file initializes the application.
 
 ## Future Work
 
