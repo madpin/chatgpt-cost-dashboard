@@ -1,10 +1,7 @@
 # chatgpt_cost_dashboard/visualization.py
 import streamlit as st
 import plotly.graph_objects as go
-from collections import Counter
-import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 
 
 class Visualization:
@@ -158,93 +155,46 @@ class Visualization:
         """Perform sentiment analysis and display results."""
         st.write("### Sentiment Analysis")
         messages_df = self.data_analysis.load_conversations_data()
-        messages_df = self.perform_sentiment_analysis(messages_df)
-        sentiment_counts = messages_df["sentiment"].value_counts()
-        st.bar_chart(sentiment_counts)
-
-    def perform_sentiment_analysis(self, messages_df: pd.DataFrame) -> pd.DataFrame:
-        """Perform a basic sentiment analysis based on keywords."""
-        positive_keywords = ["good", "great", "excellent", "positive", "happy"]
-        negative_keywords = ["bad", "terrible", "poor", "negative", "sad"]
-
-        def get_sentiment(message):
-            if message is None:
-                return "neutral"
-            if any(word in message for word in positive_keywords):
-                return "positive"
-            elif any(word in message for word in negative_keywords):
-                return "negative"
-            else:
-                return "neutral"
-
-        messages_df["sentiment"] = messages_df["message_content"].apply(get_sentiment)
-        return messages_df
+        # Ensure 'message_content' column exists and is not empty
+        if "message_content" in messages_df.columns and not messages_df["message_content"].isnull().all():
+            messages_df = self.data_analysis.perform_sentiment_analysis(messages_df)
+            sentiment_counts = messages_df["sentiment"].value_counts()
+            st.bar_chart(sentiment_counts)
+        else:
+            st.write("Sentiment analysis cannot be performed due to missing or empty message content.")
 
     def display_keyword_analysis(self):
         """Perform keyword analysis and display results."""
         st.write("### Keyword Analysis")
         messages_df = self.data_analysis.load_conversations_data()
-        keyword_df = self.perform_keyword_analysis(messages_df)
-        st.write(keyword_df)
-        st.bar_chart(keyword_df.set_index("keyword"))
-
-    def perform_keyword_analysis(self, messages_df: pd.DataFrame) -> pd.DataFrame:
-        """Perform a basic keyword frequency analysis."""
-        words = messages_df["message_content"].str.cat(sep=" ").lower().split()
-        word_counts = Counter(words)
-        keyword_df = (
-            pd.DataFrame(word_counts.items(), columns=["keyword", "frequency"])
-            .sort_values(by="frequency", ascending=False)
-            .head(20)
-        )
-        return keyword_df
+        # Ensure 'message_content' column exists and is not empty
+        if "message_content" in messages_df.columns and not messages_df["message_content"].isnull().all():
+            keyword_df = self.data_analysis.perform_keyword_analysis(messages_df)
+            st.write(keyword_df)
+            st.bar_chart(keyword_df.set_index("keyword"))
+        else:
+            st.write("Keyword analysis cannot be performed due to missing or empty message content.")
 
     def display_cost_forecasting(self):
         """Perform cost forecasting and display results."""
         st.write("### Cost Forecasting")
         messages_df = self.data_analysis.load_conversations_data()
-        forecast_df = self.perform_cost_forecasting(messages_df)
-        st.line_chart(forecast_df.set_index("month")["forecasted_cost"])
-
-    def perform_cost_forecasting(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Forecast future costs using linear regression."""
-        df["message_create_datetime"] = pd.to_datetime(
-            df["message_create_datetime"], errors="coerce"
-        )
-        df["month"] = df["message_create_datetime"].dt.to_period("M").astype(str)
-        monthly_costs = df.groupby("month")["total_cost"].sum().reset_index()
-        monthly_costs["month"] = pd.to_datetime(monthly_costs["month"])
-
-        # Handling missing values
-        monthly_costs = monthly_costs.dropna()
-
-        # Linear regression for forecasting
-        X = np.array(
-            (monthly_costs["month"] - pd.to_datetime("1970-01-01")).dt.days
-        ).reshape(-1, 1)
-        y = monthly_costs["total_cost"].values
-        model = LinearRegression().fit(X, y)
-
-        future_months = pd.date_range(
-            monthly_costs["month"].max() + pd.offsets.MonthBegin(), periods=3, freq="MS"
-        )
-        future_X = np.array(
-            (future_months - pd.to_datetime("1970-01-01")).days
-        ).reshape(-1, 1)
-        future_costs = model.predict(future_X)
-
-        forecast_df = pd.DataFrame(
-            {"month": future_months, "forecasted_cost": future_costs}
-        )
-        return forecast_df
+        # Ensure necessary columns exist for forecasting
+        if "message_create_datetime" in messages_df.columns and "total_cost" in messages_df.columns:
+            forecast_df = self.data_analysis.perform_cost_forecasting(messages_df)
+            if not forecast_df.empty:
+                st.line_chart(forecast_df.set_index("month")["forecasted_cost"])
+            else:
+                st.write("Cost forecasting could not be performed. The data might be insufficient.")
+        else:
+            st.write("Cost forecasting cannot be performed due to missing datetime or cost data.")
 
     def display_token_efficiency(self):
         """Display token efficiency."""
         st.write("### Token Efficiency")
         messages_df = self.data_analysis.load_conversations_data()
-        efficiency = (
-            100 * messages_df["output_tokens"].sum() / messages_df["input_tokens"].sum()
-        )
+        efficiency = self.data_analysis.calculate_token_efficiency(messages_df)
+        
         fig = go.Figure(
             go.Indicator(
                 mode="gauge+number",
@@ -260,10 +210,9 @@ class Visualization:
                     "threshold": {
                         "line": {"color": "red", "width": 4},
                         "thickness": 0.75,
-                        "value": 90,
+                        "value": 90,  # Target efficiency
                     },
                 },
             )
         )
-
         st.plotly_chart(fig)

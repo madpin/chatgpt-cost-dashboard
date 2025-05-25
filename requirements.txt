@@ -5,5 +5,4 @@ plotly
 numpy
 scikit-learn
 watchdog
-matplotlib
 streamlit-aggrid 
